@@ -26,10 +26,11 @@ def is_link(url, processed):
     if url not in processed:
         if url.startswith('#') or url.startswith('javascript:'):
             return False
-        is_file = url.endswith(['pdf', 'jpg', 'jpeg', 'png', 'docx', 'csv', 'xls'])
-        if is_file:
-            return False
-        return True
+        return not (
+            is_file := url.endswith(
+                ['pdf', 'jpg', 'jpeg', 'png', 'docx', 'csv', 'xls']
+            )
+        )
     return False
 
 
@@ -39,7 +40,7 @@ def photon(seedUrl):
     storage = set()  # urls that belong to the target i.e. in-scope
     schema = urlparse(seedUrl).scheme  # extract the scheme e.g. http or https
     host = urlparse(seedUrl).netloc  # extract the host e.g. example.com
-    main_url = schema + '://' + host  # join scheme and host to make the root url
+    main_url = f'{schema}://{host}'
     storage.add(seedUrl)  # add the url to storage
     checkedScripts = set()
     all_techs = []
@@ -69,9 +70,12 @@ def photon(seedUrl):
         for link in matches:  # iterate over the matches
             # remove everything after a "#" to deal with in-page anchors
             this_url = handle_anchor(target, link.group(1))
-            if is_link(this_url, processed):
-                if urlparse(this_url).netloc == host:
-                    storage.add(this_url.split('#')[0])
+            if (
+                is_link(this_url, processed)
+                and urlparse(this_url).netloc == host
+            ):
+                storage.add(this_url.split('#')[0])
+
     for x in range(2):
         urls = storage - processed  # urls to crawl = all urls - urls that have been crawled
         threadpool = concurrent.futures.ThreadPoolExecutor(

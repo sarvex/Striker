@@ -8,8 +8,8 @@ import core.config
 
 def loader():
     path = var('path')
-    for each in glob.glob(path + '/db/*'):
-        name = re.search(r'/([^/]*?)\.\w+$', each).group(1)
+    for each in glob.glob(f'{path}/db/*'):
+        name = re.search(r'/([^/]*?)\.\w+$', each)[1]
         if each.endswith('.json'):
             updateVar(name, json.loads(reader(each, mode='joined')))
         else:
@@ -17,10 +17,7 @@ def loader():
 
 
 def make_list(data):
-    if 'str' in str(type(data)):
-        return [data]
-    else:
-        return data
+    return [data] if 'str' in str(type(data)) else data
 
 
 def var(name):
@@ -49,10 +46,7 @@ def reader(path, mode=None):
 
 
 def getUrl(url, GET):
-    if GET:
-        return url.split('?')[0]
-    else:
-        return url
+    return url.split('?')[0] if GET else url
 
 
 def getParams(url, data, GET):
@@ -80,13 +74,12 @@ def deJSON(data):
 
 def writer(obj, path):
     kind = str(type(obj)).split('\'')[0]
-    if kind == 'list' or kind == 'tuple':
+    if kind in ['list', 'tuple']:
         obj = '\n'.join(obj)
     elif kind == 'dict':
         obj = json.dumps(obj, indent=4)
-    savefile = open(path, 'w+')
-    savefile.write(str(obj.encode('utf-8')))
-    savefile.close()
+    with open(path, 'w+') as savefile:
+        savefile.write(str(obj.encode('utf-8')))
 
 
 def script_extractor(response):
@@ -100,11 +93,8 @@ def script_extractor(response):
 
 def js_extractor(response):
     """Extract js code from the response body"""
-    scripts = []
     matches = re.finditer(r'(?m)<(?:script|SCRIPT)[^>]*>(.*?)</(?:script|SCRIPT)>', response)
-    for match in matches:
-        scripts.append(match.group(1))
-    return scripts
+    return [match.group(1) for match in matches]
 
 
 def handle_anchor(parent_url, url):
@@ -112,15 +102,15 @@ def handle_anchor(parent_url, url):
     if url[:4] == 'http':
         return url
     elif url[:2] == '//':
-        return scheme + ':' + url
+        return f'{scheme}:{url}'
     elif url.startswith('/'):
         host = urlparse(parent_url).netloc
-        parent_url = scheme + '://' + host
+        parent_url = f'{scheme}://{host}'
         return parent_url + url
     elif parent_url.endswith('/'):
         return parent_url + url
     else:
-        return parent_url + '/' + url
+        return f'{parent_url}/{url}'
 
 def isProtected(parsed):
     protected = False

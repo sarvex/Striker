@@ -13,6 +13,6 @@ def portscanner(targets):
     threadpool = concurrent.futures.ThreadPoolExecutor(
         max_workers=1000)
     futures = (threadpool.submit(scan, target, result) for target in targets)
-    for i in concurrent.futures.as_completed(futures):
+    for _ in concurrent.futures.as_completed(futures):
         pass
     return result

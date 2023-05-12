@@ -15,22 +15,24 @@ def wappalyzer(response, js, scripts):
 					if re.search(deJSON(pattern), headers['Cookie']):
 						result.append(app)
 						if 'implies' in signatures['apps'][app]:
-							for tech in signatures['apps'][app]['implies']:
-								result.append(app)
+							result.extend(app for _ in signatures['apps'][app]['implies'])
 	for app in signatures['apps']:
 		if 'headers' in signatures['apps'][app]:
-			for header in signatures['apps'][app]['headers']:
-				if header in headers:
-					if re.search(deJSON(signatures['apps'][app]['headers'][header]), headers[header]):
-						result.append(app)
+			result.extend(
+				app
+				for header in signatures['apps'][app]['headers']
+				if header in headers
+				and re.search(
+					deJSON(signatures['apps'][app]['headers'][header]), headers[header]
+				)
+			)
 	for app in signatures['apps']:
 		if 'html' in signatures['apps'][app]:
 			for pattern in make_list(signatures['apps'][app]['html']):
 				if re.search(deJSON(pattern), source_code):
 					result.append(app)
 					if 'implies' in signatures['apps'][app]:
-						for tech in signatures['apps'][app]['implies']:
-							result.append(app)
+						result.extend(app for _ in signatures['apps'][app]['implies'])
 	for app in signatures['apps']:
 		if 'scripts' in signatures['apps'][app]:
 			for pattern in make_list(signatures['apps'][app]['scripts']):
@@ -38,8 +40,7 @@ def wappalyzer(response, js, scripts):
 					if re.search(deJSON(pattern), script):
 						result.append(app)
 						if 'implies' in signatures['apps'][app]:
-							for tech in signatures['apps'][app]['implies']:
-								result.append(app)
+							result.extend(app for _ in signatures['apps'][app]['implies'])
 	for app in signatures['apps']:
 		if 'js' in signatures['apps'][app]:
 			for pattern in make_list(signatures['apps'][app]['js']):
@@ -47,6 +48,5 @@ def wappalyzer(response, js, scripts):
 					if re.search(deJSON(pattern), j):
 						result.append(app)
 						if 'implies' in signatures['apps'][app]:
-							for tech in signatures['apps'][app]['implies']:
-								result.append(app)
+							result.extend(app for _ in signatures['apps'][app]['implies'])
 	return result

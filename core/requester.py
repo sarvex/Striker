@@ -14,12 +14,10 @@ def requester(url, data=None, GET=True):
                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
                    'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36 OPR/43.0.2442.991']
     headers = var('headers')
-    if headers:
-        if 'User-Agent' not in headers:
-            headers['User-Agent'] = random.choice(user_agents)
-    if GET:
-        response = requests.get(
-            url, params=data, headers=headers, verify=False)
-    else:
-        response = requests.post(url, data=data, headers=headers, verify=False)
-    return response
+    if headers and 'User-Agent' not in headers:
+        headers['User-Agent'] = random.choice(user_agents)
+    return (
+        requests.get(url, params=data, headers=headers, verify=False)
+        if GET
+        else requests.post(url, data=data, headers=headers, verify=False)
+    )

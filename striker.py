@@ -25,8 +25,8 @@ print ('''%s
               ` . ` . ` . `
                   ` . `
 %s''' % (red, white, red, end))
-print ('%s Running component level check' % run)
-print ('%s Starting engine' % run)
+print(f'{run} Running component level check')
+print(f'{run} Starting engine')
 updateVar('path', sys.path[0])
 updateVar('checkedScripts', set())
 loader()
@@ -37,7 +37,7 @@ from modules.portscanner import portscanner
 from modules.findsubdomains import findsubdomains
 from modules.security_trails import security_trails
 
-print ('%s Turning on radar' % run)
+print(f'{run} Turning on radar')
 dataset = {}
 source_1 = findsubdomains(sys.argv[1])
 try:
@@ -52,33 +52,25 @@ unique_ips = {}
 for raw_subdomain in raw_subdomains:
 	try:
 		ip = socket.gethostbyname(raw_subdomain)
-		dataset[raw_subdomain] = {}
-		dataset[raw_subdomain]['ip'] = ip
+		dataset[raw_subdomain] = {'ip': ip}
 		if ip not in unique_ips:
 			open_ports = portscanner([(ip, port) for port in var('ports')])
 			dataset[raw_subdomain]['ports'] = open_ports
 			unique_ips[ip] = open_ports
-			if 443 in open_ports:
-				dataset[raw_subdomain]['schema'] = 'https'
-			else:
-				dataset[raw_subdomain]['schema'] = 'http'
 		else:
 			open_ports = unique_ips[ip]
 			dataset[raw_subdomain]['ports'] = open_ports
-			if 443 in open_ports:
-				dataset[raw_subdomain]['schema'] = 'https'
-			else:
-				dataset[raw_subdomain]['schema'] = 'http'
-		print ('%s[✈️]%s %s' % (green, end, raw_subdomain))
+		dataset[raw_subdomain]['schema'] = 'https' if 443 in open_ports else 'http'
+		print(f'{green}[✈️]{end} {raw_subdomain}')
 	except (socket.gaierror, UnicodeError):
 		pass
 
 # print ('%s Deploying wavelet analyzing module to detect hidden targets.' % run)
 # print ('Wavelets analyzed [1/1]')
-print ('%s Deploying Zoom for subdomain takeovers' % run)
-print ('%s Deploying Photon for component assessment' % run)
-print ('%s Deploying Alpha for software fingerprinting' % run)
-print ('%s Deploying Zetanize for identifying entry points' % run)
+print(f'{run} Deploying Zoom for subdomain takeovers')
+print(f'{run} Deploying Photon for component assessment')
+print(f'{run} Deploying Alpha for software fingerprinting')
+print(f'{run} Deploying Zetanize for identifying entry points')
 print ('%s ETA: %i seconds' % (info, 10 * 2 * len(dataset)))
 
 for subdomain in dataset:
